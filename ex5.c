@@ -57,7 +57,7 @@ void reorganizeDataBaseForReduction();
 int howMuchSpaceInDB();
 void moveShowsDB();
 int doesSeasonExist(TVShow *show, char *name);
-int doesEpisodeExist(TVShow *show, char *name);
+int doesEpisodeExist(TVShow *show, char *episodeName, char *seasonName);
 
 void freeEpisode(Episode *e);
 void freeSeason(Season *s);
@@ -577,7 +577,6 @@ void addEpisode(){
 
     if(showName == NULL){
         printf("sorry we have encountered a memory allocation error \nwhile trying to get the shows name try again later");
-        free(showName);
         exit(1);
     }
 
@@ -593,7 +592,6 @@ void addEpisode(){
     if(seasonName == NULL){
         printf("sorry we have encountered a memory allocation error \nwhile trying to get the seasons name try again later");
         free(showName);
-        free(seasonName);
         exit(1);
     }
 
@@ -610,11 +608,10 @@ void addEpisode(){
         printf("sorry we have encountered a memory allocation error \nwhile trying to get the episode name try again later");
         free(showName);
         free(seasonName);
-        free(episodeName);
         exit(1);
     }
 
-    if(doesEpisodeExist(show, episodeName)){
+    if(doesEpisodeExist(show, episodeName, seasonName)){
         printf("Episode already exists.\n");
         free(showName);
         free(seasonName);
@@ -692,7 +689,6 @@ void deleteEpisode(){
 
     if(showName == NULL){
         printf("sorry we have encountered a memory allocation error \nwhile trying to get the shows name try again later");
-        free(showName);
         exit(1);
     }
 
@@ -708,7 +704,6 @@ void deleteEpisode(){
     if(seasonName == NULL){
         printf("sorry we have encountered a memory allocation error \nwhile trying to get the seasons name try again later");
         free(showName);
-        free(seasonName);
         exit(1);
     }
 
@@ -725,11 +720,10 @@ void deleteEpisode(){
         printf("sorry we have encountered a memory allocation error \nwhile trying to get the episode name try again later");
         free(showName);
         free(seasonName);
-        free(episodeName);
         exit(1);
     }
 
-    if(!doesEpisodeExist(show, episodeName)){
+    if(!doesEpisodeExist(show, episodeName, seasonName)){
         printf("Episode not found.\n");
         free(showName);
         free(seasonName);
@@ -873,21 +867,23 @@ int doesSeasonExist(TVShow *show, char *name){
 }
 
 
-int doesEpisodeExist(TVShow *show, char *name){
+int doesEpisodeExist(TVShow *show, char *episodeName, char *seasonName){
     Season* season;
     Episode* episode;
 
     /* going through all episodes */
     season = show -> seasons;
     while (season != NULL){
-        episode = season -> episodes;
-        while (episode != NULL){
-            if(strcmp(episode -> name, name) == 0)
-                return TRUE;
+        if(strcmp(season -> name, seasonName) == 0){
+            episode = season -> episodes;
+            while (episode != NULL){
+                if(strcmp(episode -> name, episodeName) == 0)
+                    return TRUE;
 
-            episode = episode -> next;
+                episode = episode -> next;
+            }
+            return FALSE;
         }
-        
         season = season -> next;
     }
     return FALSE;
@@ -1001,7 +997,7 @@ void printEpisode(){
         exit(1);
     }
 
-    if(!doesEpisodeExist(show, episodeName)){
+    if(!doesEpisodeExist(show, episodeName, seasonName)){
         printf("Episode not found.\n");
         free(showName);
         free(seasonName);
@@ -1038,7 +1034,7 @@ void printArray(){
                 printf("[%s] ", (database[i][j] -> name));
             }
             else
-                printf("[NULL]");
+                printf("[NULL] ");
         }
         printf("\n");
     }
